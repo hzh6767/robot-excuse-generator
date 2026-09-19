@@ -1,0 +1,33 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>机器人借口生成器</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <main class="shell">
+    <header class="topbar"><div class="bot-mark" aria-hidden="true">⌁</div><div><div class="eyebrow">ROBOT EXCUSE LAB</div><h1>机器人借口生成器</h1></div></header>
+    <p class="intro">给我一件没做完的事，我给你一段听起来像系统日志的借口。</p>
+    <section class="workspace">
+      <div class="panel form-panel">
+        <label for="task">要解释的任务</label>
+        <input id="task" maxlength="80" placeholder="例如：忘记回复消息" value="忘记回复消息">
+        <div class="field-grid">
+          <label for="urgency">紧急程度<select id="urgency"><option value="low">不太急</option><option value="mid" selected>今天要交</option><option value="high">现在就要</option></select></label>
+          <label for="context">发生场景<select id="context"><option value="home">家里</option><option value="office" selected>办公室</option><option value="space">太空站</option><option value="cafe">咖啡店</option></select></label>
+        </div>
+        <button id="generate" class="primary" type="button"><span aria-hidden="true">⚡</span> 生成一条借口</button>
+      </div>
+      <div class="panel output-panel" aria-live="polite">
+        <div class="output-meta"><span id="status">待机中</span><button id="copy" class="copy" type="button" disabled>复制</button></div>
+        <blockquote id="excuse">“系统正在等待一件值得甩锅的事情。”</blockquote>
+        <div id="diagnostics" class="diagnostics">核心模块：借口引擎 · 置信度：--</div>
+      </div>
+    </section>
+    <section class="panel log-panel"><div class="section-heading"><h2>借口日志</h2><button id="clear" class="quiet" type="button">清空</button></div><div id="log" class="log"><p class="empty">生成结果会出现在这里。</p></div></section>
+  </main>
+  <script src="app.js"></script>
+</body>
+</html>
