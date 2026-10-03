@@ -6,6 +6,7 @@ const diagnostics = $('#diagnostics');
 const log = $('#log');
 let latest = '';
 
+const TASK_FALLBACK = '这件事';
 const pieces = {
   low: ['进入了低功耗模式', '正在等待合适的灵感窗口', '把优先级误判成了装饰性标签'],
   mid: ['触发了跨部门同步延迟', '在自动备份里找到了一个更旧的版本', '被日历提醒的提醒给提醒忘了'],
@@ -16,41 +17,53 @@ const places = {
 };
 const endings = ['我会在系统重新获得勇气后第一时间处理。', '目前没有数据证明这不是一个合理的决定。', '请把这次延迟视为一次免费的流程优化。'];
 function pick(array) { return array[Math.floor(Math.random() * array.length)]; }
-function addLog(text, confidence) {
-  const empty = log.querySelector('.empty');
+function cleanTaskValue(value) { return String(value ?? '').trim() || TASK_FALLBACK; }
+function buildExcuse(cleanTask, urgency, context) {
+  return `关于“${cleanTask}”：我原本准备立刻完成，但${pick(pieces[urgency])}，而且${places[context]}。${pick(endings)}`;
+}
+function rollConfidence() { return 61 + Math.floor(Math.random() * 36); }
+function addLog(target, text, confidence, cleanTask) {
+  const empty = target.querySelector('.empty');
   if (empty) empty.remove();
   const entry = document.createElement('article');
   const heading = document.createElement('strong');
   const message = document.createElement('p');
   entry.className = 'log-entry';
-  heading.textContent = `${new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })} · 任务：${task.value.trim() || '未命名任务'}`;
+  heading.textContent = `${new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })} · 任务：${cleanTask} · 置信度：${confidence}%`;
   message.textContent = text;
   entry.append(heading, message);
-  log.prepend(entry);
-  while (log.children.length > 6) log.lastElementChild.remove();
+  target.prepend(entry);
+  while (target.children.length > 6) target.lastElementChild.remove();
+  return entry;
 }
 
-$('#generate').addEventListener('click', () => {
-  const urgency = $('#urgency').value;
-  const context = $('#context').value;
-  const cleanTask = task.value.trim() || '这件事';
-  latest = `关于“${cleanTask}”：我原本准备立刻完成，但${pick(pieces[urgency])}，而且${places[context]}。${pick(endings)}`;
-  excuse.textContent = `“${latest}”`;
-  const confidence = 61 + Math.floor(Math.random() * 36);
-  status.textContent = '已生成 · 仅供甩锅';
-  diagnostics.textContent = `核心模块：借口引擎 · 置信度：${confidence}% · 证据链：暂无`;
-  $('#copy').disabled = false;
-  addLog(latest, confidence);
-});
+// 浏览器直接打开 index.html 时走这段；Node 下只导出纯函数供测试使用。
+if (typeof module !== 'undefined' && module.exports) {
+  module.exports = { pieces, places, endings, pick, cleanTaskValue, buildExcuse, rollConfidence, addLog, TASK_FALLBACK };
+}
 
-$('#copy').addEventListener('click', async () => {
-  if (!latest) return;
-  try { await navigator.clipboard.writeText(latest); status.textContent = '已复制到剪贴板'; }
-  catch { status.textContent = '复制失败，请手动选择文本'; }
-});
-$('#clear').addEventListener('click', () => {
-  const empty = document.createElement('p');
-  empty.className = 'empty';
-  empty.textContent = '生成结果会出现在这里。';
-  log.replaceChildren(empty);
-});
+if ($('#generate')) {
+  $('#generate').addEventListener('click', () => {
+    const cleanTask = cleanTaskValue(task.value);
+    latest = buildExcuse(cleanTask, $('#urgency').value, $('#context').value);
+    excuse.textContent = `“${latest}”`;
+    const confidence = rollConfidence();
+    status.textContent = '已生成 · 仅供甩锅';
+    diagnostics.textContent = `核心模块：借口引擎 · 置信度：${confidence}% · 证据链：暂无`;
+    $('#copy').disabled = false;
+    addLog(log, latest, confidence, cleanTask);
+  });
+
+  $('#copy').addEventListener('click', async () => {
+    if (!latest) return;
+    try { await navigator.clipboard.writeText(latest); status.textContent = '已复制到剪贴板'; }
+    catch { status.textContent = '复制失败，请手动选择文本'; }
+  });
+
+  $('#clear').addEventListener('click', () => {
+    const empty = document.createElement('p');
+    empty.className = 'empty';
+    empty.textContent = '生成结果会出现在这里。';
+    log.replaceChildren(empty);
+  });
+}
