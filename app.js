@@ -29,7 +29,7 @@ function addLog(target, text, confidence, cleanTask) {
   const heading = document.createElement('strong');
   const message = document.createElement('p');
   entry.className = 'log-entry';
-  heading.textContent = `${new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })} · 任务：${cleanTask} · 置信度：${confidence}%`;
+  heading.textContent = `${new Date().toLocaleTimeString('zh-CN', { hour: '2-digit', minute: '2-digit', hour12: false })} · 任务：${cleanTask} · 置信度：${confidence}%`;
   message.textContent = text;
   entry.append(heading, message);
   target.prepend(entry);
