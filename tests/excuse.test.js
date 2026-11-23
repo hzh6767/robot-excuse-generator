@@ -27,11 +27,6 @@ function makeElement(tag) {
   };
   return el;
 }
-globalThis.document = {
-  querySelector: () => null,
-  createElement: (tag) => makeElement(tag)
-};
-
 const logic = require(path.join(__dirname, '..', 'app.js'));
 const { pieces, places, endings, pick, cleanTaskValue, buildExcuse, rollConfidence, addLog } = logic;
 
@@ -83,6 +78,8 @@ test('rollConfidence：始终落在 61-96 的信度区间', () => {
     assert.ok(value >= 61 && value <= 96, String(value));
   }
 });
+
+globalThis.document = { createElement: makeElement };
 
 test('addLog：首次写入移除占位、新条目置顶、标题带上置信度', () => {
   const log = emptyLog();

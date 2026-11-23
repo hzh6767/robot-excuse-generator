@@ -1,11 +1,3 @@
-const $ = (selector) => document.querySelector(selector);
-const task = $('#task');
-const excuse = $('#excuse');
-const status = $('#status');
-const diagnostics = $('#diagnostics');
-const log = $('#log');
-let latest = '';
-
 const TASK_FALLBACK = '这件事';
 const pieces = {
   low: ['进入了低功耗模式', '正在等待合适的灵感窗口', '把优先级误判成了装饰性标签'],
@@ -42,7 +34,15 @@ if (typeof module !== 'undefined' && module.exports) {
   module.exports = { pieces, places, endings, pick, cleanTaskValue, buildExcuse, rollConfidence, addLog, TASK_FALLBACK };
 }
 
-if ($('#generate')) {
+if (typeof document !== 'undefined' && document.querySelector('#generate')) {
+  const $ = (selector) => document.querySelector(selector);
+  const task = $('#task');
+  const excuse = $('#excuse');
+  const status = $('#status');
+  const diagnostics = $('#diagnostics');
+  const log = $('#log');
+  let latest = '';
+
   $('#generate').addEventListener('click', () => {
     const cleanTask = cleanTaskValue(task.value);
     latest = buildExcuse(cleanTask, $('#urgency').value, $('#context').value);
