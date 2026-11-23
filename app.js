@@ -34,7 +34,7 @@ if (typeof module !== 'undefined' && module.exports) {
   module.exports = { pieces, places, endings, pick, cleanTaskValue, buildExcuse, rollConfidence, addLog, TASK_FALLBACK };
 }
 
-if (typeof document !== 'undefined' && document.querySelector('#generate')) {
+if (typeof document !== 'undefined' && document.querySelector('#excuse-form')) {
   const $ = (selector) => document.querySelector(selector);
   const task = $('#task');
   const excuse = $('#excuse');
@@ -42,8 +42,11 @@ if (typeof document !== 'undefined' && document.querySelector('#generate')) {
   const diagnostics = $('#diagnostics');
   const log = $('#log');
   let latest = '';
+  let copyRequest = 0;
 
-  $('#generate').addEventListener('click', () => {
+  $('#excuse-form').addEventListener('submit', (event) => {
+    event.preventDefault();
+    copyRequest++;
     const cleanTask = cleanTaskValue(task.value);
     latest = buildExcuse(cleanTask, $('#urgency').value, $('#context').value);
     excuse.textContent = `“${latest}”`;
@@ -56,8 +59,13 @@ if (typeof document !== 'undefined' && document.querySelector('#generate')) {
 
   $('#copy').addEventListener('click', async () => {
     if (!latest) return;
-    try { await navigator.clipboard.writeText(latest); status.textContent = '已复制到剪贴板'; }
-    catch { status.textContent = '复制失败，请手动选择文本'; }
+    const request = ++copyRequest;
+    try {
+      await navigator.clipboard.writeText(latest);
+      if (request === copyRequest) status.textContent = '已复制到剪贴板';
+    } catch {
+      if (request === copyRequest) status.textContent = '复制失败，请手动选择文本';
+    }
   });
 
   $('#clear').addEventListener('click', () => {
