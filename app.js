@@ -1,11 +1,3 @@
-const $ = (selector) => document.querySelector(selector);
-const task = $('#task');
-const excuse = $('#excuse');
-const status = $('#status');
-const diagnostics = $('#diagnostics');
-const log = $('#log');
-let latest = '';
-
 const TASK_FALLBACK = '这件事';
 const pieces = {
   low: ['进入了低功耗模式', '正在等待合适的灵感窗口', '把优先级误判成了装饰性标签'],
@@ -42,8 +34,19 @@ if (typeof module !== 'undefined' && module.exports) {
   module.exports = { pieces, places, endings, pick, cleanTaskValue, buildExcuse, rollConfidence, addLog, TASK_FALLBACK };
 }
 
-if ($('#generate')) {
-  $('#generate').addEventListener('click', () => {
+if (typeof document !== 'undefined' && document.querySelector('#excuse-form')) {
+  const $ = (selector) => document.querySelector(selector);
+  const task = $('#task');
+  const excuse = $('#excuse');
+  const status = $('#status');
+  const diagnostics = $('#diagnostics');
+  const log = $('#log');
+  let latest = '';
+  let copyRequest = 0;
+
+  $('#excuse-form').addEventListener('submit', (event) => {
+    event.preventDefault();
+    copyRequest++;
     const cleanTask = cleanTaskValue(task.value);
     latest = buildExcuse(cleanTask, $('#urgency').value, $('#context').value);
     excuse.textContent = `“${latest}”`;
@@ -56,8 +59,13 @@ if ($('#generate')) {
 
   $('#copy').addEventListener('click', async () => {
     if (!latest) return;
-    try { await navigator.clipboard.writeText(latest); status.textContent = '已复制到剪贴板'; }
-    catch { status.textContent = '复制失败，请手动选择文本'; }
+    const request = ++copyRequest;
+    try {
+      await navigator.clipboard.writeText(latest);
+      if (request === copyRequest) status.textContent = '已复制到剪贴板';
+    } catch {
+      if (request === copyRequest) status.textContent = '复制失败，请手动选择文本';
+    }
   });
 
   $('#clear').addEventListener('click', () => {
